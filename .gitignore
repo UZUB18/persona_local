@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.codex
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
