@@ -178,6 +178,42 @@ app.post("/api/chats/:id/messages", asyncRoute(async (req, res) => {
   res.status(201).json({ userMessage: db.listMessages(chatId).at(-2), assistantMessage });
 }));
 
+app.post("/api/chats/:id/messages/stream", asyncRoute(async (req, res) => {
+  const chatId = Number(req.params.id);
+  const chat = db.getChat(chatId);
+  if (!chat) {
+    res.status(404).json({ error: "Chat not found" });
+    return;
+  }
+  const body = z.object({ content: z.string().min(1) }).parse(req.body);
+  db.addMessage(chatId, "user", body.content);
+  const messages = db.listMessages(chatId).map((message) => ({
+    role: message.role,
+    content: message.content
+  }));
+  const persona = db.getPersona(chat.personaId);
+  if (!persona) {
+    res.status(404).json({ error: "Persona not found" });
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive"
+  });
+
+  let answer = "";
+  for await (const event of streamChatWithPersona(persona.systemPrompt, messages)) {
+    if (event.type === "content") answer += event.text;
+    writeSse(res, event.type, event);
+  }
+  if (answer.trim()) {
+    db.addMessage(chatId, "assistant", answer.trim());
+  }
+  res.end();
+}));
+
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const message = err instanceof Error ? err.message : "Unexpected server error";
   const status = message.includes("required") ? 400 : 500;

@@ -2,6 +2,8 @@ node_modules
 dist
 .env
 .codex
+dev-server*.log
+.dev-server.pid
 *.db
 *.db-shm
 *.db-wal

@@ -1,4 +1,6 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+
+dotenv.config({ override: true });
 
 function optionalNumber(value: string | undefined) {
   if (!value) return undefined;
@@ -8,9 +10,9 @@ function optionalNumber(value: string | undefined) {
 
 export const config = {
   port: Number(process.env.PORT ?? 8787),
-  openAiApiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || "",
-  openAiBaseUrl: process.env.OPENAI_BASE_URL || (process.env.OPENROUTER_API_KEY ? "https://openrouter.ai/api/v1" : undefined),
-  openAiModel: process.env.OPENAI_MODEL || (process.env.OPENROUTER_API_KEY ? "deepseek/deepseek-v4-flash" : "deepseek/deepseek-v4-flash"),
+  openAiApiKey: process.env.OPENROUTER_API_KEY || "",
+  openAiBaseUrl: "https://openrouter.ai/api/v1",
+  openAiModel: process.env.OPENAI_MODEL || "deepseek/deepseek-v4-flash",
   openRouterReferer: process.env.OPENROUTER_REFERER || "http://localhost:5173",
   openRouterTitle: process.env.OPENROUTER_TITLE || "Persona Roleplay",
   chatMaxTokens: optionalNumber(process.env.CHAT_MAX_TOKENS),
